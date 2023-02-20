@@ -1,0 +1,28 @@
+#!/bin/bash
+arc=$(uname -a)
+cpu=$(cat /proc/cpuinfo | grep processor | wc -l)
+vcpu=$(cat /proc/cpuinfo | grep processor | wc -l)
+ram=$(free --mega | grep Mem | awk '{printf"%s/%sMB (%2.f%%)",$3, $2, $3/$2*100 }')
+rom=$(df -m --total | grep 'total' | awk '{printf"%d/%dGb (%d%%)", $4 ,$2/1000,$5 }')
+cpuload=$(top -bn1 | grep load | awk '{printf"%.1f%%", $(NF-2)}')
+lrb=$(who -b | awk '{print $3,$4}')
+lvmstatus=$(lsblk | grep lvm | wc -l | awk '{if ($1) {print "Yes";exit;} else {print "No"}}')
+TCPstatus=$(netstat -an | grep 'ESTABLISHED' | wc -l)
+usrlog=$(who | wc -l)
+ipv4=$(hostname -I)
+adressmac=$(ip a | grep ether | awk '{print $2}')
+sudocmd=$(journalctl _COMM=sudo | grep COMMAND | wc -l)
+wall "
+#Architecture : $arc
+#CPU physical : $cpu
+#vCPU :$vcpu
+#Memory Usage : $ram
+#Disk Usage : $rom
+#CPU load : $cpuload
+#Last boot : $lrb
+#LVM use: $lvmstatus
+#Connections TCP :$TCPstatus ESTABLISHED
+#User log : $usrlog
+#Network :  IP $ipv4 ($adressmac)
+#Sudo :  $sudocmd cmd
+"
